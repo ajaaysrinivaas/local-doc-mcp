@@ -320,8 +320,8 @@ For enterprise/sensitive use: You control the entire process. Review the source,
 
 ```bash
 # Clone and navigate
-git clone https://github.com/yourusername/document-rag-mcp
-cd document-rag-mcp
+git clone https://github.com/ajaaysrinivaas/local-doc-mcp.git
+cd local-doc-mcp
 
 # Restore dependencies
 dotnet restore src/
@@ -348,3 +348,11 @@ dotnet publish src/ -c Release -r osx-x64 --self-contained -p:PublishSingleFile=
 ```
 
 Executable will be in `./publish/`
+
+---
+
+## License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+
+Permission is granted to use, modify, and distribute this software freely, including for commercial purposes. Attribution is appreciated but not required.
