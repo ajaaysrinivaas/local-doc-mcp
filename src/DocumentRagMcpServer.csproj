@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <PublishTrimmed>false</PublishTrimmed>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+    <RootNamespace>DocumentRagMcpServer</RootNamespace>
+    <AssemblyName>DocumentRagMcpServer</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Assets/pdf_parser.py" />
+    <EmbeddedResource Include="Assets/preprocess_documents.py" />
+  </ItemGroup>
+
+  <Target Name="CopyExeToRoot" AfterTargets="Publish">
+    <Copy SourceFiles="$(PublishDir)DocumentRagMcpServer.exe" DestinationFolder="$(ProjectDir).." SkipUnchangedFiles="false" />
+  </Target>
+
+</Project>
+

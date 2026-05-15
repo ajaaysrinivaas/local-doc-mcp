@@ -1,0 +1,9 @@
+{
+    "pageRange": null,
+    "meta": null,
+    "maxSectionSize": 8192,
+    "customHeadingPatterns": [
+        "\\d+\\.\\d+\\s+"
+    ],
+    "windowOverlap": 0
+}

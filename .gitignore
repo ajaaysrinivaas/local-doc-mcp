@@ -1,0 +1,53 @@
+# Build results
+bin/
+obj/
+dist/
+src/bin/
+src/obj/
+src/bin/Release/
+
+# IDE
+.vs/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# User-specific
+*.user
+*.suo
+
+# Windows Zone Identifier
+*:Zone.Identifier
+
+# Dependencies
+packages/
+.nuget/
+
+# Logs
+*.log
+logs/
+
+# Build output
+build/
+publish/
+*.dll
+*.exe
+*.pdb
+
+# Data and configuration
+assets/
+documents/
+raw/
+/old
+.index/
+document_index.json
+
+# IDE cache
+*.lscache
+
+# Deployment scripts (user-specific)
+publish-deploy.sh
+run-server.bat
+build-windows.bat
