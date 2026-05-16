@@ -67,9 +67,6 @@ namespace DocumentRagMcpServer
                         Console.Error.WriteLine($"Stack trace: {ex.StackTrace}");
                         throw;
                     }
-                    // Ensure resources are cleaned up before creating new repository
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
                     Console.Error.WriteLine();
                 }
                 else if (!hasConsole && !skipSetup)

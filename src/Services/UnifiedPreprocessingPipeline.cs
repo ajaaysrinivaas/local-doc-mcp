@@ -318,8 +318,9 @@ namespace DocumentRagMcpServer.Services
 
         private static string? GetPythonExecutable()
         {
-            var candidates = new[] { "python3", "python", "py" };
-            foreach (var cmd in candidates)
+            // Try each candidate by running it directly — works in venv, PowerShell, CMD, and any shell
+            // Avoids 'where'/'which' which are unreliable (PowerShell aliases, venv, etc.)
+            foreach (var cmd in new[] { "python3", "python", "py" })
             {
                 try
                 {
@@ -333,7 +334,7 @@ namespace DocumentRagMcpServer.Services
                         CreateNoWindow = true
                     };
                     using var p = Process.Start(psi);
-                    if (p?.WaitForExit(1000) == true && p.ExitCode == 0) return cmd;
+                    if (p?.WaitForExit(3000) == true && p.ExitCode == 0) return cmd;
                 }
                 catch { }
             }

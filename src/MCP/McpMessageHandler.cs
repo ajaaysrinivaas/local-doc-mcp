@@ -25,14 +25,17 @@ namespace DocumentRagMcpServer.MCP
             _index = await _repo.LoadIndexAsync();
         }
 
-        public McpMessage HandleMessage(McpMessage message) => message.Method switch
+        public async Task<McpMessage> HandleMessageAsync(McpMessage message)
         {
-            "initialize" => HandleInitialize(message),
-            "tools/list" => HandleListTools(message),
-            "tools/call" => HandleCallTool(message),
-            "ping" => new McpMessage { Id = message.Id, Result = new { } },
-            _ => new McpMessage { Id = message.Id, Error = new ErrorObject { Code = -32601, Message = "Method not found" } }
-        };
+            switch (message.Method)
+            {
+                case "initialize": return HandleInitialize(message);
+                case "tools/list": return HandleListTools(message);
+                case "tools/call": return await HandleCallToolAsync(message);
+                case "ping": return new McpMessage { Id = message.Id, Result = new { } };
+                default: return new McpMessage { Id = message.Id, Error = new ErrorObject { Code = -32601, Message = "Method not found" } };
+            }
+        }
 
         private McpMessage HandleInitialize(McpMessage message)
         {
@@ -77,7 +80,7 @@ namespace DocumentRagMcpServer.MCP
             return new McpMessage { Id = message.Id, Result = new ListToolsResult { Tools = tools } };
         }
 
-        private McpMessage HandleCallTool(McpMessage message)
+        private async Task<McpMessage> HandleCallToolAsync(McpMessage message)
         {
             if (_index == null)
                 return Err(message.Id, -32603, "Index not initialized");
@@ -95,15 +98,15 @@ namespace DocumentRagMcpServer.MCP
 
             try
             {
-                var result = p.Name switch
+                Task<object> taskResult = p.Name switch
                 {
-                    "search" => HandleSearch(p),
-                    "get_section" => HandleGetSection(p),
-                    "get_page" => HandleGetPage(p),
-                    "list_files" => HandleListFiles(),
-                    _ => throw new InvalidOperationException($"Unknown tool: {p.Name}")
+                    "search"      => Task.FromResult(HandleSearch(p)),
+                    "get_section" => Task.FromResult(HandleGetSection(p)),
+                    "list_files"  => Task.FromResult(HandleListFiles()),
+                    "get_page"    => HandleGetPageAsync(p),
+                    _             => throw new InvalidOperationException($"Unknown tool: {p.Name}")
                 };
-                return new McpMessage { Id = message.Id, Result = result };
+                return new McpMessage { Id = message.Id, Result = await taskResult };
             }
             catch (Exception ex)
             {
@@ -177,14 +180,14 @@ namespace DocumentRagMcpServer.MCP
             return Wrap(result);
         }
 
-        private object HandleGetPage(CallToolParams p)
+        private async Task<object> HandleGetPageAsync(CallToolParams p)
         {
             var pageNum = GetInt(p, "page_number", 0);
             if (pageNum <= 0) throw new ArgumentException("Missing or invalid page_number");
             var fileId = GetStr(p, "file_id");
 
             // PRIMARY: Try source documents first
-            var sourceResults = _repo.GetPageFromSourceAsync(pageNum, fileId).Result;
+            var sourceResults = await _repo.GetPageFromSourceAsync(pageNum, fileId);
             if (sourceResults.Count > 0)
             {
                 return Wrap(sourceResults.Select(s => new
@@ -217,7 +220,7 @@ namespace DocumentRagMcpServer.MCP
                 throw new InvalidOperationException(
                     $"Page {pageNum} not found{(fileId != null ? $" in file '{fileId}'" : "")} (checked both source documents and index)");
 
-            return Wrap(matches);
+            return (object)Wrap(matches);
         }
 
         private object HandleListFiles()

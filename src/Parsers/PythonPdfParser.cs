@@ -162,44 +162,28 @@ namespace DocumentRagMcpServer.Parsers
 
         private static string? GetPythonExecutable()
         {
-            // Try python3, python, then py on Windows
-            var candidates = new[] { "python3", "python", "py" };
-            foreach (var candidate in candidates)
+            // Try each candidate by running it directly — works in venv, PowerShell, CMD, and any shell
+            // Avoids 'where'/'which' which are unreliable (PowerShell aliases, venv, etc.)
+            foreach (var cmd in new[] { "python3", "python", "py" })
             {
-                var executable = FindExecutable(candidate);
-                if (!string.IsNullOrWhiteSpace(executable))
-                    return executable;
-            }
-
-            return null;
-        }
-
-        private static string? FindExecutable(string executable)
-        {
-            try
-            {
-                var process = new ProcessStartInfo
+                try
                 {
-                    FileName = Environment.OSVersion.Platform == PlatformID.Win32NT
-                        ? "where"
-                        : "which",
-                    Arguments = executable,
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
-
-                using var proc = Process.Start(process);
-                if (proc != null)
-                {
-                    var output = proc.StandardOutput.ReadToEnd().Trim();
-                    if (!string.IsNullOrWhiteSpace(output))
-                        return output.Split('\n')[0]; // Take first result
+                    var psi = new ProcessStartInfo
+                    {
+                        FileName = cmd,
+                        Arguments = "--version",
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    };
+                    using var proc = Process.Start(psi);
+                    if (proc?.WaitForExit(3000) == true && proc.ExitCode == 0) return cmd;
                 }
+                catch { }
             }
-            catch { }
-
             return null;
         }
+
     }
 }

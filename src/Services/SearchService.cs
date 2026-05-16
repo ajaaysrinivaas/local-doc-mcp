@@ -23,7 +23,7 @@ namespace DocumentRagMcpServer.Services
         private static readonly Regex _controlCharsRegex = new(@"[\x00-\x08\x0B\x0C\x0E-\x1F]", RegexOptions.Compiled);
 
         private readonly IDocumentRepository _repository;
-        private readonly Dictionary<string, List<SearchResult>> _cache = new();
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<string, List<SearchResult>> _cache = new();
         private const int CACHE_SIZE = 50;
 
         public SearchService(IDocumentRepository repository) => _repository = repository;
@@ -92,12 +92,13 @@ namespace DocumentRagMcpServer.Services
             results.Sort((a, b) => b.RelevanceScore.CompareTo(a.RelevanceScore));
 
             var top = results.Take(limit).ToList();
-            _cache[cacheKey] = top;
+            _cache.TryAdd(cacheKey, top);
             EvictCache();
             return top;
         }
 
         public void ClearCache() => _cache.Clear();
+
 
         // --- Hierarchy ---
 
@@ -212,7 +213,7 @@ namespace DocumentRagMcpServer.Services
             if (_cache.Count > CACHE_SIZE)
             {
                 var toRemove = _cache.Keys.Take(_cache.Count - CACHE_SIZE / 2).ToList();
-                foreach (var k in toRemove) _cache.Remove(k);
+                foreach (var k in toRemove) _cache.TryRemove(k, out _);
             }
         }
     }

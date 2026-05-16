@@ -1,4 +1,0 @@
-PyMuPDF==1.23.8
-click==8.2.1
-colorama==0.4.6
-pathlib2==2.3.7.post1

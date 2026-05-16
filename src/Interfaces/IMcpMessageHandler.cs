@@ -9,8 +9,8 @@ namespace DocumentRagMcpServer.Interfaces
     /// </summary>
     public interface IMcpMessageHandler
     {
-        /// <summary>Handle an incoming MCP message.</summary>
-        McpMessage HandleMessage(McpMessage message);
+        /// <summary>Handle an incoming MCP message and return a response.</summary>
+        Task<McpMessage> HandleMessageAsync(McpMessage message);
 
         /// <summary>Load and initialise the document index.</summary>
         Task InitializeAsync();

@@ -34,19 +34,28 @@ namespace DocumentRagMcpServer.MCP
         {
             var input = Console.In;
 
-            while (input.Peek() != -1)
+            while (true)
             {
+                string? line;
                 try
                 {
-                    var line = await input.ReadLineAsync();
-                    if (string.IsNullOrEmpty(line))
-                        continue;
+                    line = await input.ReadLineAsync();
+                }
+                catch
+                {
+                    break;
+                }
 
+                if (line == null) break; // EOF
+                if (string.IsNullOrWhiteSpace(line)) continue;
+
+                try
+                {
                     var message = JsonSerializer.Deserialize<McpMessage>(line, _jsonOptions);
                     if (message == null)
                         continue;
 
-                    var response = _messageHandler.HandleMessage(message);
+                    var response = await _messageHandler.HandleMessageAsync(message);
                     WriteResponse(response);
                 }
                 catch (Exception ex)
