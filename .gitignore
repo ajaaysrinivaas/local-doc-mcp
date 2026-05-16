@@ -5,6 +5,9 @@ dist/
 src/bin/
 src/obj/
 src/bin/Release/
+src/DocumentRagMcpServer
+src/DocumentRagMcpServer.exe
+src/DocumentRagMcpServer.pdb
 
 # IDE
 .vs/
