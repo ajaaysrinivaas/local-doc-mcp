@@ -100,11 +100,11 @@ namespace DocumentRagMcpServer.MCP
             {
                 Task<object> taskResult = p.Name switch
                 {
-                    "search"      => Task.FromResult(HandleSearch(p)),
+                    "search" => Task.FromResult(HandleSearch(p)),
                     "get_section" => Task.FromResult(HandleGetSection(p)),
-                    "list_files"  => Task.FromResult(HandleListFiles()),
-                    "get_page"    => HandleGetPageAsync(p),
-                    _             => throw new InvalidOperationException($"Unknown tool: {p.Name}")
+                    "list_files" => Task.FromResult(HandleListFiles()),
+                    "get_page" => HandleGetPageAsync(p),
+                    _ => throw new InvalidOperationException($"Unknown tool: {p.Name}")
                 };
                 return new McpMessage { Id = message.Id, Result = await taskResult };
             }

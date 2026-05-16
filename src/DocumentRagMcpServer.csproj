@@ -9,7 +9,6 @@
     <PublishReadyToRun>true</PublishReadyToRun>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
-    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
     <RootNamespace>DocumentRagMcpServer</RootNamespace>
     <AssemblyName>DocumentRagMcpServer</AssemblyName>
   </PropertyGroup>
@@ -23,8 +22,12 @@
     <EmbeddedResource Include="Assets/preprocess_documents.py" />
   </ItemGroup>
 
-  <Target Name="CopyExeToRoot" AfterTargets="Publish">
+  <Target Name="CopyExeToRoot" AfterTargets="Publish" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
     <Copy SourceFiles="$(PublishDir)DocumentRagMcpServer.exe" DestinationFolder="$(ProjectDir).." SkipUnchangedFiles="false" />
+  </Target>
+
+  <Target Name="CopyBinaryToRoot" AfterTargets="Publish" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+    <Copy SourceFiles="$(PublishDir)DocumentRagMcpServer" DestinationFolder="$(ProjectDir).." SkipUnchangedFiles="false" />
   </Target>
 
 </Project>
