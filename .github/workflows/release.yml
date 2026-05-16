@@ -48,7 +48,7 @@ jobs:
         run: |
           mkdir -p ./release-windows
           cp publish/win-x64/DocumentRagMcpServer.exe ./release-windows/
-          cp publish/win-x64/DocumentRagMcpServer.pdb ./release-windows/ || true
+          cp publish/win-x64/DocumentRagMcpServer.pdb ./release-windows/ 2>/dev/null || true
           cp requirements.txt ./release-windows/
           cp mcp-config.json ./release-windows/
           cp README.md ./release-windows/
@@ -66,36 +66,32 @@ jobs:
       - name: Create Windows archive
         run: |
           cd release-windows
-          zip -r ../DocumentRagMcpServer-${{ steps.version.outputs.VERSION }}-win-x64.zip *
+          zip -r ../DocumentRagMcpServer-${{ steps.version.outputs.VERSION }}-win-x64.zip .
           cd ..
 
       - name: Create Linux archive
         run: |
           cd release-linux
-          tar -czf ../DocumentRagMcpServer-${{ steps.version.outputs.VERSION }}-linux-x64.tar.gz *
+          tar -czf ../DocumentRagMcpServer-${{ steps.version.outputs.VERSION }}-linux-x64.tar.gz .
           cd ..
 
-      - name: Create GitHub Release
-        uses: ncipollo/release-action@v1
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
         with:
-          artifacts: |
+          files: |
             DocumentRagMcpServer-${{ steps.version.outputs.VERSION }}-win-x64.zip
             DocumentRagMcpServer-${{ steps.version.outputs.VERSION }}-linux-x64.tar.gz
           body: |
             **Document RAG MCP Server ${{ steps.version.outputs.VERSION }}**
             
             ## Downloads
-            - **Windows (x64)**: `DocumentRagMcpServer-${{ steps.version.outputs.VERSION }}-win-x64.zip`
-            - **Linux (x64)**: `DocumentRagMcpServer-${{ steps.version.outputs.VERSION }}-linux-x64.tar.gz`
-            
-            ### Changes
-            See [commit log](https://github.com/ajaaysrinivaas/local-doc-mcp/commits/${{ github.sha }}) for details.
+            - **Windows (x64)**: DocumentRagMcpServer-${{ steps.version.outputs.VERSION }}-win-x64.zip
+            - **Linux (x64)**: DocumentRagMcpServer-${{ steps.version.outputs.VERSION }}-linux-x64.tar.gz
             
             ### Quick Start
             1. Download the archive for your platform
             2. Extract it
             3. Install Python dependencies: `pip install -r requirements.txt`
             4. Run: `./DocumentRagMcpServer --data-path /path/to/your/data`
-          token: ${{ secrets.GITHUB_TOKEN }}
           draft: false
           prerelease: false

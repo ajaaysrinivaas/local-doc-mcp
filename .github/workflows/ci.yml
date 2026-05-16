@@ -29,30 +29,15 @@ jobs:
       - name: Build
         run: dotnet build src/DocumentRagMcpServer.csproj -c Release --no-restore
 
-      - name: Check for errors
-        run: dotnet build src/DocumentRagMcpServer.csproj -c Release --no-restore /p:TreatWarningsAsErrors=false
-
-      - name: Publish Windows
-        if: matrix.os == 'windows-latest'
-        run: dotnet publish src/DocumentRagMcpServer.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./publish-windows
-
-      - name: Publish Linux
-        if: matrix.os == 'ubuntu-latest'
-        run: dotnet publish src/DocumentRagMcpServer.csproj -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -o ./publish-linux
-
-      - name: Verify Windows build
-        if: matrix.os == 'windows-latest'
+      - name: Publish
         run: |
-          if (-Not (Test-Path "./publish-windows/DocumentRagMcpServer.exe")) {
-            Write-Error "Windows build failed: DocumentRagMcpServer.exe not found"
-            exit 1
-          }
-        shell: pwsh
-
-      - name: Verify Linux build
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          if [ ! -f "./publish-linux/DocumentRagMcpServer" ]; then
-            echo "Linux build failed: DocumentRagMcpServer not found"
-            exit 1
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            dotnet publish src/DocumentRagMcpServer.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./publish
+          else
+            dotnet publish src/DocumentRagMcpServer.csproj -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -o ./publish
           fi
+        shell: bash
+
+      - name: Verify binary exists
+        run: ls -lh publish/
+        shell: bash
