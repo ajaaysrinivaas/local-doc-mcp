@@ -1,0 +1,101 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Publish Windows (win-x64)
+        run: |
+          dotnet publish src/DocumentRagMcpServer.csproj \
+            -c Release \
+            -r win-x64 \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:PublishReadyToRun=true \
+            -o ./publish/win-x64
+
+      - name: Publish Linux (linux-x64)
+        run: |
+          dotnet publish src/DocumentRagMcpServer.csproj \
+            -c Release \
+            -r linux-x64 \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:PublishReadyToRun=true \
+            -o ./publish/linux-x64
+
+      - name: Prepare Windows release assets
+        run: |
+          mkdir -p ./release-windows
+          cp publish/win-x64/DocumentRagMcpServer.exe ./release-windows/
+          cp publish/win-x64/DocumentRagMcpServer.pdb ./release-windows/ || true
+          cp requirements.txt ./release-windows/
+          cp mcp-config.json ./release-windows/
+          cp README.md ./release-windows/
+          cp LICENSE ./release-windows/
+
+      - name: Prepare Linux release assets
+        run: |
+          mkdir -p ./release-linux
+          cp publish/linux-x64/DocumentRagMcpServer ./release-linux/
+          cp requirements.txt ./release-linux/
+          cp mcp-config.json ./release-linux/
+          cp README.md ./release-linux/
+          cp LICENSE ./release-linux/
+
+      - name: Create Windows archive
+        run: |
+          cd release-windows
+          zip -r ../DocumentRagMcpServer-${{ steps.version.outputs.VERSION }}-win-x64.zip *
+          cd ..
+
+      - name: Create Linux archive
+        run: |
+          cd release-linux
+          tar -czf ../DocumentRagMcpServer-${{ steps.version.outputs.VERSION }}-linux-x64.tar.gz *
+          cd ..
+
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: |
+            DocumentRagMcpServer-${{ steps.version.outputs.VERSION }}-win-x64.zip
+            DocumentRagMcpServer-${{ steps.version.outputs.VERSION }}-linux-x64.tar.gz
+          body: |
+            **Document RAG MCP Server ${{ steps.version.outputs.VERSION }}**
+            
+            ## Downloads
+            - **Windows (x64)**: `DocumentRagMcpServer-${{ steps.version.outputs.VERSION }}-win-x64.zip`
+            - **Linux (x64)**: `DocumentRagMcpServer-${{ steps.version.outputs.VERSION }}-linux-x64.tar.gz`
+            
+            ### Changes
+            See [commit log](https://github.com/ajaaysrinivaas/local-doc-mcp/commits/${{ github.sha }}) for details.
+            
+            ### Quick Start
+            1. Download the archive for your platform
+            2. Extract it
+            3. Install Python dependencies: `pip install -r requirements.txt`
+            4. Run: `./DocumentRagMcpServer --data-path /path/to/your/data`
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: false
+          prerelease: false
