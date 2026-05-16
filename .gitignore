@@ -51,3 +51,9 @@ document_index.json
 publish-deploy.sh
 run-server.bat
 build-windows.bat
+
+# Release artifacts
+*.tar.gz
+*.zip
+release/
+release-assets/

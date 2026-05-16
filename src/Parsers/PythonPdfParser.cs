@@ -160,17 +160,18 @@ namespace DocumentRagMcpServer.Parsers
             return (successCount, failureCount, errors);
         }
 
-        private static string GetPythonExecutable()
+        private static string? GetPythonExecutable()
         {
-            // Try python3 first, then python
-            var python3 = FindExecutable("python3");
-            if (python3 != null) return python3;
+            // Try python3, python, then py on Windows
+            var candidates = new[] { "python3", "python", "py" };
+            foreach (var candidate in candidates)
+            {
+                var executable = FindExecutable(candidate);
+                if (!string.IsNullOrWhiteSpace(executable))
+                    return executable;
+            }
 
-            var python = FindExecutable("python");
-            if (python != null) return python;
-
-            // Default fallback
-            return Environment.OSVersion.Platform == PlatformID.Win32NT ? "python" : "python3";
+            return null;
         }
 
         private static string? FindExecutable(string executable)

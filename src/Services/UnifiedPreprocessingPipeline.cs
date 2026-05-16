@@ -29,7 +29,7 @@ namespace DocumentRagMcpServer.Services
         private readonly string _rawPath;
         private readonly string _documentsPath;
         private readonly string _configPath;
-        private readonly string _pythonExe;
+        private readonly string? _pythonExe;
 
         private static readonly System.Text.RegularExpressions.Regex _htmlScriptStyleRegex = new(
             @"<(script|style)[^>]*>.*?</(script|style)>",
@@ -249,6 +249,9 @@ namespace DocumentRagMcpServer.Services
                 if (!string.IsNullOrEmpty(configPath))
                     arguments += $" \"{configPath}\"";
 
+                if (string.IsNullOrWhiteSpace(_pythonExe))
+                    throw new InvalidOperationException("Python not found in PATH. Install Python 3 and make sure 'python' or 'py' is available on the command line.");
+
                 var psi = new ProcessStartInfo
                 {
                     FileName = _pythonExe,
@@ -313,7 +316,7 @@ namespace DocumentRagMcpServer.Services
             return stripped.Trim();
         }
 
-        private static string GetPythonExecutable()
+        private static string? GetPythonExecutable()
         {
             var candidates = new[] { "python3", "python", "py" };
             foreach (var cmd in candidates)
@@ -334,7 +337,7 @@ namespace DocumentRagMcpServer.Services
                 }
                 catch { }
             }
-            return "python";
+            return null;
         }
 
         /// <summary>Wrapper class for deserializing preprocessing config from JSON files.</summary>
