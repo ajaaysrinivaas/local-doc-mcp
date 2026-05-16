@@ -1,0 +1,65 @@
+{
+    "servers": {
+        "document-rag": {
+            "type": "stdio",
+            "command": "C:\\path\\to\\DocumentRagMcpServer.exe",
+            "args": [
+                "--data-path",
+                "C:\\path\\to\\your\\data\\directory"
+            ],
+            "env": {}
+        }
+    },
+    "tools": [
+        {
+            "name": "search",
+            "description": "Search documents by keywords. Optionally filter to a specific file using file_id. If no file_id is provided, searches all files.",
+            "arguments": {
+                "query": {
+                    "type": "string",
+                    "description": "Keywords or phrase to search for."
+                },
+                "file_id": {
+                    "type": "string",
+                    "description": "Optional. File ID from list_files to restrict search to one file."
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Max results 1-20 (default 5)."
+                }
+            }
+        },
+        {
+            "name": "get_section",
+            "description": "Retrieve the full content of a specific section by ID. Includes full text, hierarchy info, and optionally adjacent sections for context.",
+            "arguments": {
+                "section_id": {
+                    "type": "string",
+                    "description": "The section ID from search results."
+                },
+                "include_context": {
+                    "type": "boolean",
+                    "description": "Optional. Include previous and next sections for context (default false)."
+                }
+            }
+        },
+        {
+            "name": "get_page",
+            "description": "Get content from a specific page number. Optionally filter to a specific file using file_id. If no file_id is provided, searches all files.",
+            "arguments": {
+                "page_number": {
+                    "type": "integer",
+                    "description": "Page number to retrieve."
+                },
+                "file_id": {
+                    "type": "string",
+                    "description": "Optional. File ID from list_files to restrict to one file."
+                }
+            }
+        },
+        {
+            "name": "list_files",
+            "description": "List all available documents with their IDs, types, and metadata.",
+            "arguments": {}
+        }
+    ]
